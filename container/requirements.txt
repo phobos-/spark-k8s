@@ -1,0 +1,5 @@
+numpy
+pandas
+requests
+kafka-python
+confluent-kafka

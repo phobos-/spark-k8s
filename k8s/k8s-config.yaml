@@ -1,0 +1,88 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres
+  namespace: default
+spec:
+  type: ExternalName
+  # https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
+  externalName: host.docker.internal
+  ports:
+    - name: port
+      port: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: kafka
+spec:
+  type: ExternalName
+  # https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
+  externalName: host.docker.internal
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: kafkalocal
+spec:
+  type: ExternalName
+  # https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
+  externalName: host.docker.internal
+  ports:
+    - protocol: TCP
+      port: 9093
+      targetPort: 9093
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: kafkalocal
+subsets:
+  - addresses:
+    - ip: 192.168.65.2
+    ports:
+      - port: 9093
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: zoolocal
+spec:
+    ports:
+        - protocol: TCP
+          port: 2181
+          targetPort: 2181
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+    name: zoolocal
+subsets:
+    - addresses:
+        - ip: 192.168.65.2
+      ports:
+        - port: 2181
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: schemalocal
+spec:
+    ports:
+        - protocol: TCP
+          port: 8081
+          targetPort: 8081
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+    name: schemalocal
+subsets:
+    - addresses:
+        - ip: 192.168.65.2
+      ports:
+        - port: 8081
