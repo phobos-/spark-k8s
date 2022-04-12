@@ -68,15 +68,16 @@ More details: https://spark.apache.org/docs/latest/running-on-kubernetes.html
 - Akka streams implement something called reactive manifesto which is great to achieve really low latency.
 - Akka streams provide a lot of operators to write declaratively transformations over streams easily.
 - One of the best approach to use when working with a real-time or reactive category.
-- In case you have more of custom needs such as running a ton of varying jobs with different actors/flows, then Akka streams can help you in that.
-- Akka streams are quite economical in some cases when it comes to threads.
+- Allows for more customization and optimization for specific use cases.
+- Akka streams are quite economical in when it comes to threads.
 
 #### Cons:
 
-- Using Akka streams imposes some overhead in getting up and running. It requires learning the DSL and also understanding what’s going on under the hood to some extent.
-- Implementation hard to read
-- Conceptually very complicated
-- Unlike heavier “streaming data processing” frameworks, Akka Streams are not “deployed” nor automatically distributed.
+- It requires learning the DSL and also understanding what’s going on under the hood to some extent.
+- Implementation is sometimes hard to read and can be conceptually complicated. It requires special way of thinking.
+- Akka Streams are not “deployed” nor automatically distributed.
+- It is a bit harder to scale horizontally adn vertically.
+- Falls off when heavy processing or high volume processing is required.
 
 ### Comparison table
 
