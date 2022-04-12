@@ -52,6 +52,8 @@ More details: https://spark.apache.org/docs/latest/running-on-kubernetes.html
 - Supports SQL as DSL, which makes it easier to use by Analysts.
 - Supported in Python, Java and Scala.
 - Can be scaled very easily both horizontally and vertically.
+- Ugly but very functional monitoring UI and history server.
+- Lineage for more complex processing, i.e. https://absaoss.github.io/spline/
 #### Cons :
 
 - Having the flexibility makes it very heavy when it comes to container size as well as start up time.
