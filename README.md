@@ -1,11 +1,102 @@
-# Spark Streaming on k8s
+# Table of contents
 
-## Prerequisites
+1. [Introduction](#intro)
+2. [About Spark](#spark)
+    1. [How Spark works](#how)
+    2. [Spark Streaming](#ss)
+    3. [Spark Streaming on K8s](#k8s)
+2. [Spark Streaming vs Akka Streams](#vs)
+3. [Practical example](#example)
+    1. [Prerequisites](#setup)
+    2. [App preparation](#app-dev)
+    3. [Deployment to K8s](#deployment)
+    4. [Results](#results)
 
-- minikube `brew install minikube kafkacat`
-- docker (I had to sue docker desktop with my m1 setup) `brew install docker` (`https://docs.docker.com/desktop/mac/apple-silicon/`)
+# Introduction <a name="intro"></a>
 
-## Starting minikube
+# About Spark <a name="spark"></a>
+## How Spark works <a name="how"></a>
+
+![Spark architecture](img/spark_cluster.pbm)
+## Spark Streaming <a name="ss"></a>
+
+![Streaming ecosystem](img/spark_streaming.png)
+## Spark Streaming on K8s <a name="k8s"></a>
+
+![Cluster mode](img/k8s-cluster-mode.png)
+
+More details: https://spark.apache.org/docs/latest/running-on-kubernetes.html
+
+### Benefits of Spark on k8s
+
+- Supported by Spark 2.3+ and Kubernetes 1.6+.
+- Marginally better performance (5% according to Amazon).
+- Option to package all dependencies along with Spark applications in containers. This avoids dependency issues that are common with Spark.
+- Better resource management.
+- Swappable backend infrastructure means Spark applications are now portable across hybrid cloud setups.
+- Kubernetes Role and ClusterRole features allow you to set fine-grained permissions for resources and organize these permissions based on API groups. 
+- Tag container images for version control which facilitates better auditing, and ability to rollback failed deployments.
+- Better integration with DevOps ecosystem like ArgoCD, Grafana.
+
+# Spark Streaming vs Akka Streams <a name="vs"></a>
+
+### Spark Streaming
+
+![Spark Streaming](img/spark_ecosystem.png)
+
+#### Pros :
+
+- Built with Big Data in mind from day 1.
+- Fault tolerance, flexible APIs, multiple formats and connectors to choose from.
+- Integrates very well with Kafka, Machine Learning.
+- Supports SQL as DSL, which makes it easier to use by Analysts.
+- Supported in Python, Java and Scala.
+- Can be scaled very easily both horizontally and vertically.
+#### Cons :
+
+- Having the flexibility makes it very heavy when it comes to container size as well as start up time.
+- Real time latency is not possible.
+- There is no type safety built in at compile time, sometimes it can be hard to debug.
+- It is mature but has many annoying bugs.
+- Performance can be pretty bad if the features are misused or not understood well.
+- Needs a dedicated cluster with resource management to run.
+### Akka Streams
+
+![Akka Streams](img/akka-streams.webp)
+#### Pros : 
+
+- Akka streams implement something called reactive manifesto which is great to achieve really low latency.
+- Akka streams provide a lot of operators to write declaratively transformations over streams easily.
+- One of the best approach to use when working with a real-time or reactive category.
+- In case you have more of custom needs such as running a ton of varying jobs with different actors/flows, then Akka streams can help you in that.
+- Akka streams are quite economical in some cases when it comes to threads.
+
+#### Cons:
+
+- Using Akka streams imposes some overhead in getting up and running. It requires learning the DSL and also understanding what’s going on under the hood to some extent.
+- Implementation hard to read
+- Conceptually very complicated
+- Unlike heavier “streaming data processing” frameworks, Akka Streams are not “deployed” nor automatically distributed.
+
+### Comparison table
+
+|                | **Spark**      | **Akka**    |
+|----------------|----------------|-------------|
+| Latency        | Near Real Time | Real Time   |
+| Architecture   | Micro Batch    | Flow        |
+| Stage type     | Query          | Graph       |
+| Container size | Big            | Small       |
+| Startup time   | Long           | Short       |
+| Use case       | Aggregations   | Projections |
+
+# Practical example <a name="example"></a>
+
+## Prerequisites <a name="setup"></a>
+
+- minikube (and optionally kafkacat) `brew install minikube kafkacat`
+- docker (I had to use docker desktop with my m1 setup) `brew install docker` (or using this link for m1 mac: https://docs.docker.com/desktop/mac/apple-silicon/)
+
+### Starting minikube
 
 ```bash
 minikube stop
@@ -28,7 +119,7 @@ minikube dashboard --url &
 kubectl proxy --address='0.0.0.0' --disable-filter=true --port=5885 &
 ```
 
-## App Development
+## App Development <a name="app-dev"></a>
 
 ### Build Kafka
 
@@ -84,7 +175,7 @@ select * from locations limit 10;
 select count(*) from locations limit 10;
 ```
 
-## App K8s Deployment
+## App K8s Deployment <a name="deployment"></a>
 
 ```bash
 cd k8s/
@@ -143,7 +234,7 @@ kubectl apply -f k8s-config.yaml
 --jars local:///opt/spark/jars/commons-pool2-2.9.0.jar,local:///opt/spark/jars/postgresql-42.2.5.jar,local:///opt/spark/jars/spark-streaming_2.12-3.1.1.jar,local:///opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.1.1.jar,local:///opt/spark/jars/kafka-clients-2.6.0.jar,local:///opt/spark/jars/spark-sql-kafka-0-10_2.12-3.1.1.jar,local:///opt/spark/jars/spark-streaming-kafka-0-10-assembly_2.12-3.1.1.jar local:///opt/work-dir/stream_process.py postgres kafka:9093
 ```
 
-## Results
+## Results <a name="results"></a>
 
 ### Logs
 
